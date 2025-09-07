@@ -10,25 +10,16 @@ console = Console()
 cursor = [0, 0]
 
 def init_board(size):
-    if size == 'inf':
-        return {(0,0): ""}
-    else:
         return [["" for _ in range(size)] for _ in range(size)]
 
 board = {}
 
 def insert_letter(board, letter, pos, size):
-    if size == 'inf':
-        board[pos] = letter
-    else:
         r, c = pos
         board[r][c] = letter
 
 
 def free_space(board,pos,size):
-    if size == 'inf':
-        return pos not in board or board[pos] == ""
-    else:
         r, c = pos
         if 0 <= r < size and 0 <= c < size:
             return board[r][c] == ""
@@ -43,40 +34,18 @@ def print_board(board, size):
     for c in range(col_range):
         table.add_column(str(c), justify="center", style="bold")
 
-    if size == "inf":
-        if not board:
-            rows = [(0,0)]
-        else:
-            min_r = min(r for r,_ in board.keys())
-            max_r = max(r for r,_ in board.keys())
-            rows = range(min_r, max_r+1)
-        for r in rows:
-            row_cells = []
-            min_c = min(c for _,c in board.keys())
-            max_c = max(c for _,c in board.keys())
-            for c in range(min_c, max_c+1):
-                val = board.get((r,c), "")
-                if val == "X":
-                    val = "[red]X[/red]"
-                elif val == "O":
-                    val = "[blue]O[/blue]"
-                if [r, c] == cursor:   # highlight cursor
-                    val = f"[reverse]{val or ' '}[/reverse]"
-                row_cells.append(val or "")
-            table.add_row(*row_cells)
-    else:
-        for r in range(size):
-            row_cells = []
-            for c in range(size):
-                val = board[r][c]
-                if [r, c] == cursor:   
-                    val = f"[reverse]{val or '.'}[/reverse]"
-                if val == "X":
-                    val = "[red]X[/red]"
-                elif val == "O":
-                    val = "[blue]O[/blue]"
-                row_cells.append(val or "")
-            table.add_row(*row_cells)
+    for r in range(size):
+        row_cells = []
+        for c in range(size):
+            val = board[r][c]
+            if [r, c] == cursor:   
+                val = f"[reverse]{val or '.'}[/reverse]"
+            if val == "X":
+                val = "[red]X[/red]"
+            elif val == "O":
+                val = "[blue]O[/blue]"
+            row_cells.append(val or "")
+        table.add_row(*row_cells)
 
     # Render table to string to center it
     from io import StringIO
@@ -98,15 +67,9 @@ def is_winner(board, pos, letter, size):
             while True:
                 r += dr * sign
                 c += dc * sign
-                if size == 'inf':
-                    if board.get((r,c)) == letter:
+                if 0 <= r < size and 0 <= c < size and board[r][c] == letter:
                         count += 1
-                    else:
-                        break
                 else:
-                    if 0 <= r < size and 0 <= c < size and board[r][c] == letter:
-                        count += 1
-                    else:
                         break
         if count >= n:
             return True
@@ -137,27 +100,13 @@ def player_move_arrow(board, letter, size):
                 print("That cell is already taken! Try another.")
 
 def comp_move(board, letter, size):
-    if size == 'inf':
-        if not board:
-            pos = (0,0)
-        else:
-            key = list(board.keys())
-            r0, c0 = random.choice(key)
-            pos = (r0 + random.randint(-1,1), c0 + random.randint(-1,1))
-            while not free_space(board, pos, size):
-                r0, c0 = random.choice(key)
-                pos = (r0 + random.randint(-1,1), c0 + random.randint(-1,1))
-    else:
-        empty = [(r,c) for r in range(size) for c in range(size) if board[r][c] == ""]
-        pos = random.choice(empty)
+    empty = [(r,c) for r in range(size) for c in range(size) if board[r][c] == ""]
+    pos = random.choice(empty)
     insert_letter(board, letter, pos, size)
     print(f"Comp move is:  {pos}")
     return pos
 
 def is_full(board, size):
-    if size == "inf":
-        return False
-    else:
         for row in board:
             if "" in row:
                 return False
@@ -165,9 +114,9 @@ def is_full(board, size):
     
 
 def main():
-    print("Choose board size (3,5,7,9 or 'inf'):")
+    print("Choose board size (3,5,7,9):")
     size_input = input()
-    size = int(size_input) if size_input.isdigit() else "inf"
+    size = int(size_input) if size_input.isdigit() else 0
 
     print("Choose mode: 1 = 2 players, 2 = vs computer")
     mode = input()
